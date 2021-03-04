@@ -56,6 +56,7 @@ The main purpose of this app development is to help people who want to make extr
 ---
 <div>
 <img src="https://user-images.githubusercontent.com/35641052/106632861-35d4f200-654c-11eb-9123-ecab48e966dd.png" height="400px" width="200px"/>
+ <img src="https://user-images.githubusercontent.com/35641052/110002377-aefe6b00-7ceb-11eb-854e-7c8a8a8599a9.gif" height="400px" width="200px" />
 </div>
 
 ### Message
