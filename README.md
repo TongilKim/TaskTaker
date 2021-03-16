@@ -6,7 +6,7 @@
 
 # About
 An Application that assists people who are living alone but need immediate help for their tasks such as cleaning, moving, delivery, or installing furniture.
-The main purpose of this app development is to help people who want to make extra money as a helper role as well as the older people who need extra hands for their daily task but having difficults.
+The main purpose of this app development is to help people who want to make extra money as a helper role as well as seniors who need extra hands for their daily task but having difficults.
 
 ### Technology Stack
 * Front-End: React-Native, Expo, React-Native Paper, React Navigation, Redux
