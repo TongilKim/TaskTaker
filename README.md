@@ -6,7 +6,7 @@
 
 # About
 An Application that assists people who are living alone but need immediate help for their tasks such as cleaning, moving, delivery, or installing furniture.
-The main purpose of this app development is to help people who want to make extra money as a helper role as well as the older people who need extra hands for their daily task but having difficults.
+The main purpose of this app development is to help people who want to make extra money as a helper role as well as seniors who need extra hands for their daily task but having difficults.
 
 ### Technology Stack
 * Front-End: React-Native, Expo, React-Native Paper, React Navigation, Redux
@@ -37,6 +37,7 @@ The main purpose of this app development is to help people who want to make extr
 <div style="vertical-align:middle; display:inline-block;">
   <img src="https://user-images.githubusercontent.com/35641052/106631382-b72b8500-654a-11eb-80a4-b600f3d03ce6.png" width="200px" height:"400px"></img>
   <img src="https://user-images.githubusercontent.com/35641052/106631425-c3174700-654a-11eb-952c-a41eda1c021e.png" width="200px" height:"400px"></img>
+  <img src="https://user-images.githubusercontent.com/35641052/109999195-57aacb80-7ce8-11eb-8adb-bcb1e2a3dc66.gif" width="200px" height:"400px"></img>
 </div>
 
 ### Signed In
@@ -55,6 +56,7 @@ The main purpose of this app development is to help people who want to make extr
 ---
 <div>
 <img src="https://user-images.githubusercontent.com/35641052/106632861-35d4f200-654c-11eb-9123-ecab48e966dd.png" height="400px" width="200px"/>
+ <img src="https://user-images.githubusercontent.com/35641052/110002377-aefe6b00-7ceb-11eb-854e-7c8a8a8599a9.gif" height="400px" width="200px" />
 </div>
 
 ### Message
@@ -62,6 +64,7 @@ The main purpose of this app development is to help people who want to make extr
 <div style="vertical-align:middle; display:inline-block;">
   <img src="https://user-images.githubusercontent.com/35641052/106633739-17232b00-654d-11eb-8dc3-cb0778b16f64.png" width="200px" height:"400px"></img>
   <img src="https://user-images.githubusercontent.com/35641052/106633785-2013fc80-654d-11eb-9a3d-6975761ff6e2.png" width="200px" height:"400px"></img>
+  <img src="https://user-images.githubusercontent.com/35641052/110001608-e6b8e300-7cea-11eb-9aff-35c9271c6521.gif" width="200px" height:"400px"></img>
 </div>
 
 ### Task Request
