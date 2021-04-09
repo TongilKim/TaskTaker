@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { View,TextInput,TouchableHighlight, StyleSheet,  Modal,  Text, TouchableOpacity, ScrollView } from "react-native";
+import { View,TextInput,TouchableHighlight, StyleSheet,  Modal,  Text, TouchableOpacity, ScrollView, Platform } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Title,  Button, Card, useTheme } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';

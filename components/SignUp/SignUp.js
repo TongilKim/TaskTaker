@@ -16,6 +16,7 @@ import { useTheme, HelperText, ActivityIndicator } from 'react-native-paper';
 import Firebase from '../../Firebase'
 import emailValidator from 'email-validator'
 import passwordValidator from 'password-validator'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { connect } from 'react-redux'
 
 function SignUp(props) {
@@ -165,7 +166,7 @@ function SignUp(props) {
                         backgroundColor: 'white'
                     }]}
                 >
-                    <ScrollView>
+                    <KeyboardAwareScrollView>
                         <View style={styles.footer}>
                             <Text style={styles.text_footer}>Email</Text>
                             <View style={styles.action}>
@@ -340,7 +341,7 @@ function SignUp(props) {
                                 </TouchableOpacity>
                             </View>
                         </View>
-                    </ScrollView>
+                    </KeyboardAwareScrollView>
                 </Animatable.View>
             </View>
         )

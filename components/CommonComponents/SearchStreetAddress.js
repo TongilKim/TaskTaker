@@ -4,6 +4,7 @@ import {
     Text,
     Platform,
     StyleSheet,
+    KeyboardAvoidingView
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Button } from 'react-native-paper';
@@ -22,16 +23,19 @@ export default function SearchStreetAddress(props) {
         <>
         
             <View style={styles.container}>
+            
                 <Animatable.View
                     animation="fadeInUpBig"
                     style={[styles.footer, {
                         backgroundColor: 'white'
                     }]}
                 >
+                    
                     <View style={styles.footer}>
+                   
                         <View style={styles.header}>
-                            <Text style={styles.text_header}>Search your address </Text>
-
+                            <Text style={styles.text_header}>Search your address</Text>
+                            <KeyboardAvoidingView>
                             <View style={styles.action}>
                                 <GooglePlacesAutocomplete
                                     placeholder='ex) 1240 Bay Street'
@@ -52,11 +56,15 @@ export default function SearchStreetAddress(props) {
                                         }
                                     }}
                                 />
+                                </View>
+                                </KeyboardAvoidingView>
                             </View>
-                        </View>
+                            
                     </View>
                     <Button mode="contained" onPress={onClickCancel} style={styles.nextBtn}>CANCEL</Button>
-                </Animatable.View>
+                    
+                    </Animatable.View>
+                
             </View>
         </>
     )
@@ -66,7 +74,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F9D71C',
-        paddingTop: '50%'
+        paddingTop: '10%'
     },
     nextBtn: {
         fontSize: 15,

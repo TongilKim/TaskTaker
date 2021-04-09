@@ -3,10 +3,13 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
 
 export default function PopularTaskList(props) {
 
+    const onTaskListClick = () => {
+        props.onTaskNameClick();
+    }
     return (
 
         <View>
-            <TouchableOpacity style={styles.listContainer}>
+            <TouchableOpacity style={styles.listContainer} onPress={onTaskListClick}>
 
                 <Image source={props.list.image} style={{ width: 100, height: 100, borderRadius: 10 }} />
                 <View style={styles.description}>

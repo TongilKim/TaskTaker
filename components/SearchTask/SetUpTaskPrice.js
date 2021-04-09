@@ -12,12 +12,12 @@ export default function SetUpTaskPrice(props) {
     const onClickNextBtn = () => {
         newTask.minPrice = minPrice;
         newTask.maxPrice = maxPrice;
-        props.navigation.navigate('TaskConfirm', newTask);
+        props.navigation.navigate('TaskConfirm', {updateRequestTaskStatus: () => props.route.params.updateRequestTaskStatus(), newTask: newTask});
     }
     
     useEffect(() => {
         if(newTask === null)
-        setNewTask(props.route.params);
+        setNewTask(props.route.params.newTask);
         
         if(minPrice && maxPrice.length > 0 && parseInt(maxPrice) > parseInt(minPrice))
             setCompletedPriceSetUp(true);

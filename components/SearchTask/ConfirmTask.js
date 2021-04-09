@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableWithoutFeedback } from 'react-native'
-import { Button, ProgressBar,List } from 'react-native-paper';
+import { Button, ProgressBar,List, ActivityIndicator } from 'react-native-paper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Firebase from '../../Firebase'
 import Modal from 'react-native-modal';
@@ -11,27 +11,42 @@ export default function ConfirmTask(props) {
     const [taskDate, setTaskDate] = useState('');
     const [minCost, setMinCost] = useState('');
     const [maxCost, setMaxCost] = useState('');
+    const [currentUserId, setCurrentUserId] = useState(null);
     const [confirmationMsgVisible, setConfirmationMsgVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const onClickConfirmBtn = () => {
-        Firebase.addTask(props.route.params);
+        let newTask = props.route.params.newTask;
+        newTask.userID = currentUserId;
+        Firebase.addTask(newTask);
         setConfirmationMsgVisible(true);
     }
     const closeModal = () => {
         setConfirmationMsgVisible(false);
-        props.navigation.navigate("Home");
+        setLoading(true);
+        props.route.params.updateRequestTaskStatus();
+        setTimeout(() => {
+            setLoading(false);
+            props.navigation.navigate("Home");
+        }, 1500)
+        
     };
 
     useEffect(() => {
-       let newTask = props.route.params;
+       let newTask = props.route.params.newTask;
        newTask.unitNumber.length > 0 ? setStreetAddress(newTask.unitNumber + " - " + newTask.streetAddress + ", " + newTask.postalCode) : setStreetAddress(newTask.streetAddress + ", " + newTask.postalCode);
         setDescription(newTask.description);
         setMinCost(newTask.minPrice);
         setMaxCost(newTask.maxPrice);
         setTaskDate(newTask.taskDate);
-    });
+        setCurrentUserId(Firebase.getCurrentUserId());
+    }, []);
 
-    return (
+    return loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" />
+        </View> 
+    ) : (
         <>
         <View style={{ flex: 1 }}>
                     <Modal isVisible={confirmationMsgVisible} >

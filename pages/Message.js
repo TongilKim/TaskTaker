@@ -1,51 +1,97 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, ScrollView, SafeAreaView } from "react-native";
+import React, { useEffect, useState, } from "react";
+import { View, Text, ScrollView } from "react-native";
 import { Avatar, Card, Title, List, Divider } from 'react-native-paper';
+import { Badge, } from 'react-native-elements';
 import Firebase from '../Firebase'
-
+import * as firebase from 'firebase';
 
 
 export default function Message(props) {
-    const [userLists, setUserLists] = useState(null);
-    const [currentUser, setCurrentUser] = useState(null);
+    const [userList, setUserList] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null); 
+    let subscribeFireStore = function (){};
 
+    const updateUserMsgStatus = () => {
+        let currentUserId = Firebase.getCurrentUserId();
 
-    useEffect(() => {
-        let userList = Firebase.getMsgUserList();
-        setUserLists(userList);
+        const msgRef = firebase.firestore().collection('users').doc(currentUserId).collection('msgUsers');
+        subscribeFireStore = msgRef.onSnapshot(snapshot => {
+            let otherUserList = snapshot.docs;
+            
+            Promise.all(otherUserList.map((otherUser) => {
+                return firebase.firestore().collection('users')
+                    .doc(otherUser.id).collection('msgUsers')
+                    .doc(currentUserId).get().then((currentUser) => {
+                        if (currentUser.data().CurrentMsgLength !== currentUser.data().LastMsgLength) {
+                            return ({ info: otherUser.data(), msgViewStatus: false, id: otherUser.id, initialMsgLength: otherUser.data().CurrentMsgLength });
+                        } else {
+                            return ({ info: otherUser.data(), msgViewStatus: true, id: otherUser.id, initialMsgLength: otherUser.data().CurrentMsgLength });
+                        }
 
-        Firebase.getCurrentUserObj((obj) => {
-            setCurrentUser(obj);
-        })
-
-    }, [])
-
-    const onUserClick = (userId) => {
-        Firebase.setSelectedUserId(userId);
-        Firebase.getMessages((messages) => {
-            return props.navigation.navigate("MessageChat", { selectedUserMessages: JSON.stringify(messages), currentUserObj: currentUser });
+                    });
+            })).then((data) => {
+                setUserList(data);
+            }).catch((err) => {
+                console.log('err: ', err);
+            });
         });
+        
+    };
+    const onUserClick = (userId, msgLength) => {
+        
+        Firebase.setSelectedUserId(userId);
+        if (msgLength !== undefined) {
+            Firebase.updateLastMsgLength(msgLength);
+        }
+        Firebase.getMessages((messages) => {
+            return props.navigation.navigate("MessageChat", { updateUserMsgStatus: () => updateUserMsgStatus(), selectedUserMessages: JSON.stringify(messages), currentUserObj: currentUser, selectedUserId: userId });
+        });
+    };
+    
+    useEffect(() => {
 
-    }
+        if (currentUser === null || userList === null) {
+            Firebase.getCurrentUserObj(async (obj) => {
+                await setCurrentUser(obj);
+                updateUserMsgStatus();
+            });
+        };
+      
+        if (currentUser !== null) {
+           updateUserMsgStatus();
+        };
+        
+        const unsubscribe = props.navigation.addListener('blur', () => {
+            subscribeFireStore();
+        });
+        return unsubscribe;
+    }, []);
 
-    return userLists !== null && currentUser !== null ? (
+    
+    return currentUser !== null && userList !== null ? (
         <>
             <View style={{ marginTop: '8%' }}>
                 <Title style={{ textAlign: 'center' }}>Messages</Title>
-                <Text style={{ textAlign: 'center' }}>{currentUser[0].id}</Text>
                 <ScrollView>
                     <Card style={{ marginTop: '5%' }}>
                         {
-                            userLists.map((user) => {
+                            userList.map((user) => {
+                                 //console.log(user);
                                 return (
                                     <List.Section key={user.id}>
-                                        <List.Item title={user.FirstName}
-                                            description={user.description ? user.description : ''}
-                                            left={() => <Avatar.Image size={50}
-                                                source={{ uri: user.ProfileImg }}
-                                                style={{ marginRight: '2%' }} />}
+                                        <List.Item title={user.info.FirstName}
+                                            description={user.info.LastReceivedMsg ? user.info.LastReceivedMsg.text : ''}
+                                            left={() => <View style={{ marginRight: '2%' }} >
+                                                <Avatar.Image size={50}
+                                                source={{ uri: user.info.ProfileImg }}
+                                                />
+                                                {user.msgViewStatus ? <></> : <Badge
+                                                    status="success"
+                                                    containerStyle={{ position: 'absolute', top: -1, right: -1 }}
+                                                /> }
+                                            </View>}
                                             right={() => <Text style={{ alignSelf: 'center', fontSize: 12 }}>{user.LastChatDate !== undefined ? new Date(user.LastChatDate.seconds * 1000).toLocaleDateString("en-US") : ''} </Text>}
-                                            onPress={() => onUserClick(user.id)}
+                                            onPress={() => onUserClick(user.id, user.initialMsgLength)}
                                         />
                                         <Divider />
                                     </List.Section>

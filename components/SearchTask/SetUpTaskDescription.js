@@ -9,7 +9,7 @@ export default function SetUpTaskDescription(props) {
     
     const onClickNextBtn = () => {
         newTask.description = description;
-        props.navigation.navigate('TaskPrice',newTask);
+        props.navigation.navigate('TaskPrice', {updateRequestTaskStatus: () => props.route.params.updateRequestTaskStatus(), newTask: newTask});
     }
     const onTextChange = (val) => {
         setDescription(val);
@@ -22,7 +22,7 @@ export default function SetUpTaskDescription(props) {
 
     useEffect(() => {
         if(newTask === null)
-        setNewTask(props.route.params);
+        setNewTask(props.route.params.newTask);
     });
 
 
@@ -52,7 +52,7 @@ export default function SetUpTaskDescription(props) {
                         value={description}
                         onChangeText={(val) => onTextChange(val)}
                     />
-                    <Button onPress={onClickNextBtn} disabled={false} mode="contained" style={[styles.nextBtn, completedDescription ? { backgroundColor: '#F9D71C' } : { backgroundColor: '#ECECEC' }]}>NEXT</Button>
+                    <Button onPress={onClickNextBtn} disabled={!completedDescription} mode="contained" style={[styles.nextBtn, completedDescription ? { backgroundColor: '#F9D71C' } : { backgroundColor: '#ECECEC' }]}>NEXT</Button>
                 </View>
             </View>
         </ScrollView>

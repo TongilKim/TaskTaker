@@ -1,25 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { Button, StyleSheet, View, FlatList, Text } from 'react-native';
+import { Button, StyleSheet, View, FlatList, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import { Card, Title, Searchbar, Chip, } from 'react-native-paper';
 import data from "../data";
 import PopularTaskList from '../components/Profile/PopularTaskList'
-
-
+import Firebase from '../Firebase'
+import * as firebase from 'firebase';
+import moment from 'moment';
+import 'moment-timezone';
 
 export default function Home(props) {
     const [filteredTaskList, setFilteredTaskList] = useState(null);
     const [mostPopularData, setMostPopularData] = useState([]);
     const [taskName, setTaskName] = useState('');
     const [showTaskList, setShowTaskList] = useState(false);
+    // const [currentUserId, setCurrentUserId] = useState(null);
+    const [taskRequests, setTaskRequests] = useState(null);
+
     const taskList = ['Delivery', 'Delivery2', 'Shopping', 'Cleaning', 'Assemble', 'IKEA Assembly', 'Laundry', 'Moving'];
 
-    useEffect(() => {
-        setMostPopularData(data);
-    }, []);
 
-    renderList = list => {
-        return <PopularTaskList list={list} />
-    }
+    const updateRequestTaskStatus = () => {
+        let currentUserId = Firebase.getCurrentUserId();
+            
+             firebase.firestore().collection('users')
+            .doc(currentUserId)
+            .collection('requestTask')
+            .limit(5)
+            .get().then(query => {
+                if (query.size > 0) { // Requests available
+                    let requests = [];
+                    firebase.firestore().collection('users').doc(currentUserId).collection('requestTask').get().then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            let endTime = new Date(doc.data().createdAt.toDate()).getTime() + 43200000; // task created time - 12 hours
+                            let leftTimeInMillSeconds = endTime - new Date().getTime();
+                            let leftHours = Math.floor((leftTimeInMillSeconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            let leftMins = Math.floor((leftTimeInMillSeconds % (1000 * 60 * 60)) / (1000 * 60));
+                            
+                            requests.push({data: doc.data(), id: doc.id, timeLeft: leftHours + ":" + leftMins});
+                        });
+                    }).then(() => {
+                        setTaskRequests(requests);
+                        
+                    });
+                } else { // Any requests are not available
+                    setTaskRequests(null);
+                    
+                }
+            });
+    };
+    
+
+    const renderList = list => {
+        return (<PopularTaskList list={list} onTaskNameClick={() => onTaskNameClick() }/>);
+    };
     const searchTask = (val) => {
         setTaskName(val);
         if (val.length > 0) {
@@ -33,18 +66,45 @@ export default function Home(props) {
             setShowTaskList(false);
         }
 
-    }
+    };
     const onTaskNameClick = (taskName) => {
-        props.navigation.navigate("SetUpTaskPlace");
+        props.navigation.navigate("SetUpTaskPlace", {updateRequestTaskStatus: () => updateRequestTaskStatus()});
         setTaskName('');
         setShowTaskList(false);
-    }
-    const onTaskChipClick = (taskName) => {
+    };
+    const onPendingTaskClick = (taskRequest) => {
+        props.navigation.navigate("PendingTask", {taskID : taskRequest.id, updateRequestTaskStatus: () => updateRequestTaskStatus()});
+    };
 
-    }
+    useEffect(() => {
+        updateRequestTaskStatus();
+        setMostPopularData(data);
+    }, []);
     return (
         <View>
-            <View style={{ alignItems: "center" }}>
+            <ScrollView>
+                <View style={{ alignItems: "center" }}>
+                    {
+                        taskRequests ? (
+                            taskRequests.map((taskRequest, index) => {
+                                return (
+                                    <TouchableOpacity key={index} onPress={() => onPendingTaskClick(taskRequest)}>
+                                        <View  style={styles.requestContainer}>
+                                            <Text style={[styles.requestText, {padding: 8, paddingBottom: 0}]} numberOfLines={1}>{taskRequest.data.description}</Text>
+                                            <View style={{ flexDirection: 'row', padding: 10,  alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                                                <View style={{ padding:4, borderRadius: 10, flexWrap: 'wrap',  backgroundColor: '#fff'}}>
+                                                    <Text style={[styles.requestText, { fontSize: 14, color: '#F9D71C', alignSelf: 'center' }]}>pending</Text>
+                                                </View>
+                                                <View>
+                                                    <Text style={[styles.requestText, { fontSize: 13 }]}>{taskRequest.timeLeft} mins left</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })
+                        ) : (  <></>)
+                    }
                 <Searchbar
                     placeholder="Search Task"
                     theme={{ colors: { primary: "#F9D71C" } }}
@@ -84,21 +144,44 @@ export default function Home(props) {
             </View>
 
             {/* Popular tasks Flatlist */}
-            <View>
-                <FlatList data={mostPopularData}
+            
+                <SafeAreaView>
+                    <FlatList
+                    data={mostPopularData}
                     keyExtractor={item => item.id.toString()}
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
                     renderItem={({ item }) => renderList(item)}
                     keyboardShouldPersistTaps="always"
-                />
-            </View>
+                    />
+                </SafeAreaView>
+            </ScrollView>
         </View>
     )
 }
 
 
 const styles = StyleSheet.create({
+    requestContainer: {
+        flexDirection: 'row',
+        marginTop: 10,
+        width: '89%',
+        paddingRight: 5,
+        paddingLeft: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#ECECEC',
+        borderRadius: 15,
+        backgroundColor: '#F9D71C',
+        flexWrap: 'wrap',
+        alignSelf: 'center'
+    },
+    requestText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 17,
+    },
     categoryContainer: {
         paddingVertical: 35,
         paddingHorizontal: 35,

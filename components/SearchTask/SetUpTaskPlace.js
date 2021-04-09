@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity,  Platform } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button, useTheme, ProgressBar } from 'react-native-paper';
 import { TextInputMask } from 'react-native-masked-text';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import moment from 'moment';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import 'moment-timezone';
 
 export default function SetUpTaskPlace(props) {
@@ -16,6 +16,7 @@ export default function SetUpTaskPlace(props) {
     const [streetAddress, setStreetAddress] = useState('');
     const [postalCode, setPostalCode] = useState('');
     const [openDatePicker, setOpenDatePicker] = useState(false);
+    const [cityName, setCityName] = useState('');
     const [date, setDate] = useState(null);
    
 
@@ -24,13 +25,14 @@ export default function SetUpTaskPlace(props) {
       };
     
     const handleConfirm = (date) => {
-    setDate(moment(date).format("YYYY/MM/DD HH:mm A"));
+    setDate(date);
+    // setDate(moment(date).format("YYYY/MM/DD HH:mm A"));
     hideDatePicker();
     };
     
     const onClickNextBtn = () => {
-        let newTask = { unitNumber: unitNumber, streetAddress: streetAddress, postalCode: postalCode, taskDate: date }
-        props.navigation.navigate("TaskDescription",newTask);
+        let newTask = {unitNumber: unitNumber, streetAddress: streetAddress, cityName: cityName, postalCode: postalCode, taskDate: date }
+        props.navigation.navigate("TaskDescription",{updateRequestTaskStatus: () => props.route.params.updateRequestTaskStatus(), newTask: newTask});
     }
   
     const onClickStreetAddress = () => {
@@ -40,6 +42,8 @@ export default function SetUpTaskPlace(props) {
     }
     const updateAddress = (addressObj) => {
         let streetName = addressObj.description;
+        let cityName = addressObj.structured_formatting.secondary_text;
+        setCityName(cityName);
         setStreetAddress(streetName);
     }
     const onClickScheduleBtn = (type) => {
@@ -65,7 +69,7 @@ export default function SetUpTaskPlace(props) {
             onCancel={hideDatePicker}
             
         />
-        <ScrollView>
+        <KeyboardAwareScrollView>
             <View style={styles.container}>
                 <Animatable.View
                     animation="fadeInUpBig"
@@ -97,7 +101,7 @@ export default function SetUpTaskPlace(props) {
                                 onFocus={() => onClickStreetAddress()}
                             />
                         </View>
-                        <Text style={styles.small_title}>Apt/Unit#</Text>
+                        <Text style={styles.small_title}>Apt/Unit# (Optional)</Text>
                         <View style={styles.action}>
                             <FontAwesome
                                 name="map-marker"
@@ -150,7 +154,7 @@ export default function SetUpTaskPlace(props) {
                     </View>
                 </Animatable.View>
             </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
         </>
     )
 }

@@ -19,7 +19,7 @@ import emailValidator from 'email-validator'
 
 function SignIn(props) {
     const [data, setData] = React.useState({
-        email: 'kkimtt1234@gmail.com',
+        email: Platform.OS === 'ios' ? 'kkimtt1234@naver.com' : 'kkimtt1234@gmail.com',
         password: 'Prime!23',
         secureTextEntry: true,
         isValidEmail: false,
@@ -104,7 +104,7 @@ function SignIn(props) {
                     isLoading: false
                 });
             }
-        }, 2000)
+        }, 2500)
     }
     return data.isLoading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -131,7 +131,7 @@ function SignIn(props) {
                                 size={20} />
                             <TextInput
                                 placeholder="Your Email"
-                                defaultValue="kkimtt1234@gmail.com"
+                                defaultValue= {Platform.OS === 'ios' ? 'kkimtt1234@naver.com' : 'kkimtt1234@gmail.com'}
                                 placeholderTextColor="#666666"
                                 style={[styles.textInput, {
                                     color: colors.text

@@ -138,7 +138,6 @@ const styles = StyleSheet.create({
     userTextInfo: {
         flexDirection: 'column',
         alignItems: 'center',
-
         padding: 30
     }
 })

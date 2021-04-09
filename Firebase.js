@@ -1,7 +1,7 @@
-import React, { Component } from 'react'
 
 import * as firebase from 'firebase';
 import 'firebase/firestore';
+import { round } from 'react-native-reanimated';
 
 
 const firebaseConfig = {
@@ -41,25 +41,28 @@ class Firebase {
                     this.currentUserId = signedUser.user.uid;
                     this.currentUserEmail = email;
                     // return the user list who had conversation with in the past.
+                    this.msgUsersRef = firebase.firestore().collection('users').doc(this.currentUserId).collection('msgUsers');
 
-                    //this.msgUsersRef = firebase.firestore().collection('users').doc(this.currentUserId).collection('msgUsers');
                     firebase.firestore().collection('users').doc(this.currentUserId).get().then((doc) => {
                         this.currentUserObj = doc.data();
-                    })
+                    });
 
                     // return all the user list in the database
-                     this.msgUsersRef = firebase.firestore().collection('users');
+                    //this.msgUsersRef = firebase.firestore().collection('users');
 
                     this.msgUsersRef.onSnapshot(snapshot => {
                         let userLists = [];
 
                         snapshot.forEach(doc => {
                             const newData = doc.data();
-                            if(doc.id !== this.currentUserId)
-                            userLists.push({ id: doc.id, ...newData, });
+                            if (doc.id !== this.currentUserId)
+                                userLists.push({ id: doc.id, ...newData, });
                         })
                         this.msgUserList = userLists;
-                    })
+                    });
+
+                   
+                    
                 }
             })
             .catch(error => {
@@ -89,27 +92,70 @@ class Firebase {
                 }
             });
     }
+    signUpNewTasker(newTaskerObj) {
+        firebase.firestore().collection('users').doc(this.currentUserId).update({Tasker: newTaskerObj});
+    }
     signOut() {
         firebase.auth().signOut()
             .then(() => console.log('User signed out!'));;
     }
-    addMsg(newMsg, selectedUserObj) {
+    async addMsg(newMsg, selectedUserObj, currentMsgLength) {
         let senderMsgRef = firebase.firestore().collection('users').doc(this.currentUserId).collection('msgUsers').doc(this.selectedUserId).collection('chats');
         let receiverMsgRef = firebase.firestore().collection('users').doc(this.selectedUserId).collection('msgUsers').doc(this.currentUserId).collection('chats');
-        senderMsgRef.add(newMsg[0]);
-        receiverMsgRef.add(newMsg[0]);
+        await senderMsgRef.add(newMsg[0]);
+        await receiverMsgRef.add(newMsg[0]);
 
-        firebase.firestore().collection('users').doc(this.currentUserId).collection('msgUsers').doc(this.selectedUserId).set(selectedUserObj);
-        firebase.firestore().collection('users').doc(this.selectedUserId).collection('msgUsers').doc(this.currentUserId).set(this.currentUserObj);
+        
+
+        senderMsgRef.get().then((snapshot) => {
+            if (snapshot.size < 2) {
+                // Adding User Object who did chat with into 'msgUsers' collection.
+                firebase.firestore().collection('users').doc(this.currentUserId).collection('msgUsers').doc(this.selectedUserId).set(selectedUserObj);
+                firebase.firestore().collection('users').doc(this.selectedUserId).collection('msgUsers').doc(this.currentUserId).set(this.currentUserObj);
+            }
+            this.updateLastReceivedMsg(newMsg[0], currentMsgLength);
+        });
     }
     addFavoritePlaces(city, province) {
         let favoritePlaceRef = firebase.firestore().collection('users').doc(this.currentUserId).collection('favoritePlaces');
         favoritePlaceRef.add({ CityName: city, ProvinceName: province });
     }
     addTask(task) {
-        let requestTaskRef = firebase.firestore().collection('users').doc(this.currentUserId).collection('requestTask');
-        requestTaskRef.add(task);
+
+        new Promise((resolve) => {
+            // Set matched user numbers
+            let matchedUsersNum = 0;
+            // Set the requested task city name
+            let taskCityName = task.cityName;
+            // Get all users first
+            let usersRef = firebase.firestore().collection('users');
+            
+            usersRef.onSnapshot(allUsers => {
+                
+                allUsers.forEach((user) => {
+                    
+                    // Filter users who joined tasker only
+                    if (user.data().Tasker) {
+                        // Check if this user set up the matched location from the requested's city
+                        if (user.id !== this.currentUserId && user.data().Tasker.cityName === taskCityName) {
+                            matchedUsersNum++; 
+                            // Add the requested task to the location matched tasker.
+                            usersRef.doc(user.id).set({ Tasker: {newTask: firebase.firestore.FieldValue.arrayUnion(task)} }, {merge : true});
+                        }
+                    }
+                });
+                resolve(matchedUsersNum);
+            });
+        }).then((matchedNum) => {
+            let requestTaskRef = firebase.firestore().collection('users').doc(this.currentUserId).collection('requestTask');
+            task.matchedUsersNum = matchedNum;
+            task.createdAt = new Date();
+            requestTaskRef.add(task);
+        })
+        
+       
     }
+    
     updateName(enteredFirstName, enteredLastName) {
         firebase.firestore().collection('users').doc(this.currentUserId)
             .update({ FirstName: enteredFirstName.charAt(0).toUpperCase()+enteredFirstName.slice(1), LastName: enteredLastName.charAt(0).toUpperCase()+enteredLastName.slice(1) });
@@ -118,20 +164,45 @@ class Firebase {
         firebase.firestore().collection('users').doc(this.currentUserId)
             .update({ PhoneNum: newPhoneNum });
     }
+    // Update the receiver's message amount with LastMsgLength when the user leaving the chat,
+    // so that the receiver compares the message amount for the notification green badge when logged in.
+    updateLastMsgLength(msgLength) {
+        firebase.firestore().collection('users').doc(this.selectedUserId).collection('msgUsers')
+            .doc(this.currentUserId).update({ LastMsgLength: msgLength });
+    }
+    // Update the total message amount and last message between the users when one user send the message
+    updateLastReceivedMsg(msgObj, currentMsgLength) {
+        firebase.firestore().collection('users').doc(this.currentUserId).collection('msgUsers')
+            .doc(this.selectedUserId).update({ LastReceivedMsg: msgObj, CurrentMsgLength: currentMsgLength });
+        
+        firebase.firestore().collection('users').doc(this.selectedUserId).collection('msgUsers')
+            .doc(this.currentUserId).update({ LastReceivedMsg: msgObj, CurrentMsgLength: currentMsgLength });
+    }
     setSelectedUserId(id) {
         this.selectedUserId = id;
     }
+    
     getFirebaseConfig() {
         return this.firebaseConfig;
     }
     getCurrentUserId() {
-        return firebase.auth().currentUser.uid;
+        return this.currentUserId;
     }
     getMsgUserList() {
         return this.msgUserList;
     }
     getErrorMsg() {
         return this.errorMsg;
+    }
+    getPendingRequestDetail(id) {
+        let requestRef = firebase.firestore().collection('users')
+            .doc(this.currentUserId).collection('requestTask').doc(id);
+        
+        return requestRef.get().then((doc) => {
+            if (doc.exists) {
+                return doc.data();
+            }
+       })
     }
     getSelectedUserObj(callback) {
         let selectedUserRef = firebase.firestore().collection('users');
@@ -168,7 +239,6 @@ class Firebase {
             let currentUserArry = [];
             snapshot.forEach(doc => {
                 const newData = doc.data();
-                
                 if (doc.id === this.currentUserId)
                     currentUserArry.push({ id: doc.id, email: this.currentUserEmail, ...newData, });
             })
@@ -176,13 +246,12 @@ class Firebase {
         })
     }
     getMessages(callback) {
-
         let msgRef = firebase.firestore().collection('users').doc(this.currentUserId).collection('msgUsers').doc(this.selectedUserId).collection('chats');
         msgRef.onSnapshot(querySnapshot => {
 
             const messageFirestore = querySnapshot.docChanges().filter(({ type }) => type === 'added').map(({ doc }) => {
                 const message = doc.data();
-
+                
                 if (Object.keys(message).length === 0)
                     return { ...message }
 
@@ -194,6 +263,9 @@ class Firebase {
     }
     deleteFavoritePlace(id) {
         firebase.firestore().collection('users').doc(this.currentUserId).collection('favoritePlaces').doc(id).delete();
+    }
+    deleteRequestedTask(taskID) {
+        firebase.firestore().collection('users').doc(this.currentUserId).collection('requestTask').doc(taskID).delete();
     }
 }
 

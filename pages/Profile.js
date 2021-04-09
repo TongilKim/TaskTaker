@@ -4,6 +4,7 @@ import { Card, Title, Avatar, Button, List, Divider } from 'react-native-paper';
 import Firebase from '../Firebase'
 import { connect } from 'react-redux'
 
+
 function Profile(props) {
     const signOut = () => {
         Firebase.signOut();
@@ -19,10 +20,10 @@ function Profile(props) {
         <>
             <View style={styles.root}>
                 <View style={styles.nameContainer}>
-                    <Avatar.Image size={65} source={{ uri: currentUserObj.ProfileImg }} />
-                    <Text style={styles.name}>{currentUserObj.FirstName + " " + currentUserObj.LastName}</Text>
+                    <Avatar.Image size={65} source={{ uri: currentUserObj.ProfileImg }} style={{marginLeft: 30}}/>
+                    <Text style={styles.name}>{currentUserObj.FirstName}</Text>
                 </View>
-                <Button color="#F9D71C" icon="swap-horizontal" mode="outlined" style={{ backgroundColor: 'white', paddingVertical: 5, fontWeight: 500 }}>Switch to Helper Mode</Button>
+                <Button color="#F9D71C" icon="swap-horizontal" mode="outlined" onPress={() => props.navigation.navigate("SignUpTasker")} style={{ backgroundColor: 'white', paddingVertical: 5, fontWeight: 500 }}>Switch to Helper Mode</Button>
                 <Card style={styles.listContainer}>
                     <List.Section>
                         <List.Item title="Profile Edit" right={() => <List.Icon icon="arrow-right" />} onPress={() => props.navigation.navigate("ProfileEdit")} />
@@ -58,19 +59,15 @@ function mapDispatchToProps(dispatch) {
 export default connect(mapStateToProps, mapDispatchToProps)(Profile)
 
 const styles = StyleSheet.create({
-    logoContainer: {
-        marginTop: '10%',
-        alignItems: 'center'
-    },
     nameContainer: {
         paddingVertical: 15,
         flexDirection: "row",
-        paddingLeft: '15%',
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        justifyContent: 'flex-start',
     },
     name: {
-        alignSelf: "center",
-        marginLeft: "20%",
+        marginLeft: 17,
+        alignSelf: 'center',
         fontWeight: 'bold',
         fontSize: 20
     },
