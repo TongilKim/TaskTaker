@@ -14,7 +14,6 @@ export default function MessageChat({ route, navigation }) {
     
     
     const handleSend = (newMsg) => {
-        
         Firebase.getSelectedUserObj((obj) => {
             delete obj.id;
             currentMsgLengthRef.current = messages.length+1;

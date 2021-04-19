@@ -9,6 +9,7 @@ export default function ChangeName(props) {
     const [lastName, setLastName] = useState('');
     const [isModalVisible, setModalVisible] = useState(false);
     const [okBtnStatus, setOkBtnStatus] = useState(false);
+    const [textColor, setTextColor] = useState('');
 
     const onClickOkBtn = () => {
         Firebase.updateName(firstName, lastName);
@@ -37,6 +38,16 @@ export default function ChangeName(props) {
         props.navigation.navigate("ProfileEdit");
     };
 
+
+    useEffect(() => {
+        if (props.route.params.mode === 'Tasker') {
+            setTextColor('#0b7fab');
+        } else {
+            setTextColor('#F9D71C');
+        }
+       
+    }, []);
+
     return (
         <>
             <View style={{ flex: 1, backgroundColor: 'white' }}>
@@ -51,7 +62,7 @@ export default function ChangeName(props) {
                         <TextInput style={styles.textInput} placeholder="Enter your last name" value={lastName} onChangeText={(val) => handleLastNameChange(val)} />
                     </View>
                 </View>
-                <TouchableOpacity disabled={!okBtnStatus} onPress={onClickOkBtn} style={[styles.textButton, okBtnStatus ? { backgroundColor: '#F9D71C' } : { backgroundColor: '#ECECEC' }]}>
+                <TouchableOpacity disabled={!okBtnStatus} onPress={onClickOkBtn} style={[styles.textButton, okBtnStatus ? { backgroundColor: textColor } : { backgroundColor: '#ECECEC' }]}>
                     <Text style={{textAlign: 'center'}}>OK</Text>
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
@@ -59,7 +70,7 @@ export default function ChangeName(props) {
                         <View style={styles.modalContainer}>
                             <List.Icon icon="account-edit" style={{ alignSelf: 'center' }} size={80} />
                             <Text style={{ textAlign: 'center', paddingBottom: 30, fontSize: 15, }}>Name is edited successfully! </Text>
-                            <TouchableOpacity style={styles.clsoeBtn} onPress={closeModal}>
+                            <TouchableOpacity style={[styles.clsoeBtn, {backgroundColor: textColor } ]} onPress={closeModal}>
                                 <Text style={{textAlign: 'center'}}>OK</Text>
                             </TouchableOpacity>
                         </View>
@@ -103,7 +114,6 @@ const styles = StyleSheet.create({
     },
     textButton: {
         fontSize: 15,
-        backgroundColor: '#F9D71C',
         alignSelf: 'center',
         marginTop: 20,
         borderRadius: 10,
@@ -115,7 +125,6 @@ const styles = StyleSheet.create({
         fontSize: 15,
         padding: 10,
         borderRadius: 10,
-        backgroundColor: '#F9D71C', 
         width: '95%',
         alignSelf: 'center'
     },

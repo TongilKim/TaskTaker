@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { View, StyleSheet, TouchableHighlight, Modal, Text, TouchableOpacity } from "react-native";
 import { Title, TextInput, Button, Card } from 'react-native-paper';
 import { TextInputMask } from 'react-native-masked-text'
@@ -9,8 +9,7 @@ import Firebase from '../../Firebase'
 
 
 export default function ChangePhoneNum(props) {
-    const [phoneNumber, setPhoneNumber] = useState('');
-    
+    const [phoneNumber, setPhoneNumber] = useState(''); 
     const [verifyCodeSentBtn, setVerifyCodeSentBtn] = useState(false);
     const [sendCodeBtn, setSendCodeBtn] = useState(false);
     const [verified, setVerified] = useState(false);
@@ -19,7 +18,8 @@ export default function ChangePhoneNum(props) {
     const [showVerifiedMsg, setShowVerifiedMsg] = useState(false);
     const [verificationId, setVerificationId] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [modalMessage,setModalMessage] = useState('');
+    const [modalMessage, setModalMessage] = useState('');
+    const [textColor, setTextColor] = useState('');
     const recaptchaVerifier = useRef(null);
 
     // Function to be called when requesting for a verification code
@@ -83,6 +83,15 @@ export default function ChangePhoneNum(props) {
                 setVerified(false);
             })
     };
+    useEffect(() => {
+        Firebase.getCurrentUserObj((user) => {
+            if (props.route.params.mode === 'Tasker') {
+                setTextColor('#0b7fab');
+            } else {
+                setTextColor('#F9D71C');
+            }
+        })
+    }, []);
     return (
         <>
 
@@ -95,7 +104,7 @@ export default function ChangePhoneNum(props) {
                             <View>
                                 <Text style={ modalMessage === 'Invalid verification code!' ? {color: 'red', alignSelf: 'center', fontSize: 15}:{color: 'black', alignSelf: 'center', fontSize: 15} }>{modalMessage}</Text>
                             </View>
-                            <TouchableOpacity onPress={handleModalClose} style={[styles.closeBtn, { backgroundColor: '#F9D71C', marginTop: 20, width: '50%', alignSelf: 'center'}]}>
+                            <TouchableOpacity onPress={handleModalClose} style={[styles.closeBtn, { backgroundColor: textColor, marginTop: 20, width: '50%', alignSelf: 'center'}]}>
                             <Text style={{ color:'white', fontWeight: 'bold', textAlign: 'center'}}>Close</Text>
                         </TouchableOpacity>
                         </View>
@@ -109,12 +118,12 @@ export default function ChangePhoneNum(props) {
                     firebaseConfig={firebase.app().options}
                 /> : <></>}
                 <Title style={styles.title}>Change Your Phone Number</Title>
-                <View style={styles.inputContainer}>
+                <View style={[styles.inputContainer, {borderColor: textColor}]}>
                     <View style={{ flex: 2}}>
                         <TextInput style={styles.textInput}
                             placeholder="Phone number"
                             underlineColor="transparent"
-                            theme={{ colors: { primary: '#F9D71C' } }}
+                            theme={{ colors: { primary: textColor } }}
                             value={phoneNumber}
                             onChangeText={(val) => handlePhoneNumChange(val)}
                             render={props =>
@@ -128,24 +137,24 @@ export default function ChangePhoneNum(props) {
                             }
                         />
                     </View>
-                    <TouchableOpacity disabled={!sendCodeBtn} onPress={onClickSendCodeBtn} style={[styles.sendBtn, sendCodeBtn ? { backgroundColor: '#F9D71C' } : { backgroundColor: '#ECECEC'}]}>
+                    <TouchableOpacity disabled={!sendCodeBtn} onPress={onClickSendCodeBtn} style={[styles.sendBtn, sendCodeBtn ? { backgroundColor: textColor } : { backgroundColor: '#ECECEC'}]}>
                         <Text style={{color: 'white', fontWeight: 'bold'}} >Send Code</Text>
                     </TouchableOpacity>
                 </View>
-                <View style={styles.inputContainer}>
+                <View style={[styles.inputContainer, {borderColor: textColor}]}>
                     <View style={{ flex: 4 }}>
                         <TextInput style={styles.textInput}
                             editable={codeEditAble}
                             underlineColor="transparent"
-                            theme={{ colors: { primary: '#F9D71C' } }}
+                            theme={{ colors: { primary: textColor } }}
                             placeholder="Code number"
                             onChangeText={(val) => handleCodeChange(val)} />
                     </View>
-                    <TouchableOpacity disabled={!verifyCodeSentBtn} onPress={onClickVerifyBtn} style={[styles.verifyBtn, verifyCodeSentBtn ? { backgroundColor: '#F9D71C' } : { backgroundColor: '#ECECEC' }]}>
+                    <TouchableOpacity disabled={!verifyCodeSentBtn} onPress={onClickVerifyBtn} style={[styles.verifyBtn, verifyCodeSentBtn ? { backgroundColor: textColor } : { backgroundColor: '#ECECEC' }]}>
                         <Text style={{color: 'white', fontWeight: 'bold'}} >Verify</Text>
                     </TouchableOpacity>
                 </View>
-                <Button onPress={onClickOkBtn} disabled={!verified} color="#F9D71C" mode="contained" style={[styles.okBtn, verified ? { backgroundColor: '#F9D71C' } : { backgroundColor: '#ECECEC' }]}>OK</Button>
+                <Button onPress={onClickOkBtn} disabled={!verified} color={textColor} mode="contained" style={[styles.okBtn, verified ? { backgroundColor: textColor } : { backgroundColor: '#ECECEC' }]}>OK</Button>
             </View>
         </>
     )
@@ -160,7 +169,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#F9D71C',
         borderRadius: 10,
         backgroundColor: '#fff'
     },
@@ -177,7 +185,6 @@ const styles = StyleSheet.create({
     },
     sendBtn: {
         fontSize: 14,
-        backgroundColor: '#F9D71C',
         padding: 10,
        borderRadius: 10
     },
@@ -188,7 +195,6 @@ const styles = StyleSheet.create({
     },
     okBtn: {
         fontSize: 15,
-        backgroundColor: '#F9D71C',
         alignSelf: 'center',
         borderRadius: 5,
         marginTop: 20,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, TouchableWithoutFeedback, Text, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TextInput,  Text, TouchableOpacity } from "react-native";
 import { Card, Title, Button, useTheme, HelperText } from 'react-native-paper';
 import Firebase from '../../Firebase'
 import * as firebase from 'firebase';
@@ -12,15 +12,20 @@ export default function ConfirmPswd(props) {
     const [pswdErrorMsg, setPswdErrorMsg] = useState('');
     const [hasPswdError, setHasPswdError] = useState(false);
     const [okBtnStatus, setOkBtnStatus] = useState(false);
-
+    const [textColor, setTextColor] = useState('');
     const { colors } = useTheme();
 
 
     useEffect(() => {
         Firebase.getCurrentUserObj((user) => {
             setEmail(user[0].email)
-        })
-    }, [])
+        });
+        if (props.route.params.mode === 'Tasker') {
+            setTextColor('#0b7fab');
+        } else {
+            setTextColor('#F9D71C');
+        }
+    }, []);
 
     const onPressPswdVisible = () => {
         setPasswordVisible(!passwordVisible);
@@ -39,7 +44,7 @@ export default function ConfirmPswd(props) {
             email, password);
         firebase.auth().currentUser.reauthenticateWithCredential(credential)
             .then(() => {
-                props.navigation.navigate("ChangePassword");
+                props.navigation.navigate("ChangePassword", {mode: props.route.params.mode === 'Tasker' ? 'Tasker' : 'Customer'});
                 setPassword('');
                 okBtnStatus(false);
                 setHasPswdError(false);
@@ -99,7 +104,7 @@ export default function ConfirmPswd(props) {
             <Button
                 disabled={!okBtnStatus}
                 mode="contained"
-                style={[styles.textButton, okBtnStatus ? { backgroundColor: '#F9D71C' } : { backgroundColor: '#ECECEC' }]}
+                style={[styles.textButton, okBtnStatus ? { backgroundColor: textColor } : { backgroundColor: '#ECECEC' }]}
                 onPress={onPressOk}>OK</Button>
         </View>
     )

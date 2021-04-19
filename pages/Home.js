@@ -31,12 +31,17 @@ export default function Home(props) {
                     let requests = [];
                     firebase.firestore().collection('users').doc(currentUserId).collection('requestTask').get().then((querySnapshot) => {
                         querySnapshot.forEach((doc) => {
+                            // To make the request timeset with 12 hrs.
                             let endTime = new Date(doc.data().createdAt.toDate()).getTime() + 43200000; // task created time - 12 hours
                             let leftTimeInMillSeconds = endTime - new Date().getTime();
                             let leftHours = Math.floor((leftTimeInMillSeconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                             let leftMins = Math.floor((leftTimeInMillSeconds % (1000 * 60 * 60)) / (1000 * 60));
                             
-                            requests.push({data: doc.data(), id: doc.id, timeLeft: leftHours + ":" + leftMins});
+                            if (leftMins < 0) { // if the task has time out, delete the task
+                                Firebase.deleteRequestedTask(doc.id);
+                            } else {
+                                requests.push({data: doc.data(), id: doc.id, timeLeft: leftHours + ":" + leftMins});    
+                            }
                         });
                     }).then(() => {
                         setTaskRequests(requests);

@@ -25,7 +25,8 @@ export default function ChangePswd(props) {
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(true);
     const [isModalVisible, setModalVisible] = useState(false);
     const [okBtnStatus, setOkBtnStatus] = useState(false);
-
+    const [btnColor, setBtnColor] = useState('');
+   
     const validatePswd = () => {
         if (newPswd !== confirmNewPswd) {
             setPswdErrorMsg('Entered password is not matched.');
@@ -72,6 +73,15 @@ export default function ChangePswd(props) {
         setNewPswd('');
         props.navigation.navigate("ProfileEdit");
     };
+
+    useEffect(() => {
+        if (props.route.params.mode === 'Tasker') {
+            setBtnColor('#0b7fab');
+        } else {
+            setBtnColor('#F9D71C');
+        }
+    }, []);
+
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
             <Title style={styles.title}>Change Your Password</Title>
@@ -146,7 +156,7 @@ export default function ChangePswd(props) {
             <Button
                 disabled={!okBtnStatus}
                 mode="contained"
-                style={[styles.textButton, okBtnStatus ? { backgroundColor: '#F9D71C' } : { backgroundColor: '#ECECEC' }]}
+                style={[styles.textButton, okBtnStatus ? { backgroundColor: btnColor } : { backgroundColor: '#ECECEC' }]}
                 onPress={validatePswd}>OK</Button>
             <View style={{ flex: 1 }}>
                 <Modal isVisible={isModalVisible} >

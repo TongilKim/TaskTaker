@@ -25,6 +25,7 @@ export default function Message(props) {
                         if (currentUser.data().CurrentMsgLength !== currentUser.data().LastMsgLength) {
                             return ({ info: otherUser.data(), msgViewStatus: false, id: otherUser.id, initialMsgLength: otherUser.data().CurrentMsgLength });
                         } else {
+                            
                             return ({ info: otherUser.data(), msgViewStatus: true, id: otherUser.id, initialMsgLength: otherUser.data().CurrentMsgLength });
                         }
 

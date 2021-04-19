@@ -261,6 +261,7 @@ class Firebase {
             callback(messageFirestore)
         })
     }
+    
     deleteFavoritePlace(id) {
         firebase.firestore().collection('users').doc(this.currentUserId).collection('favoritePlaces').doc(id).delete();
     }
