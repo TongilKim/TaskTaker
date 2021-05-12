@@ -1,4 +1,4 @@
-# Task Helper App ( on progress )
+# Task Helper App ( In progress )
 **_Contents:_**
 * [About](#About)
 * [Authors](#Authors)
